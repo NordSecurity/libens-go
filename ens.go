@@ -1875,8 +1875,9 @@ type ErrorNotificationCallback interface {
 	
 	// Signals that the ENS session has ended and no further `notify`
 	// calls will be made on this callback. Called at most once per
-	// `Connection`. Calling `shutdown()` will trigger 
-	// `disconnected("shutdown")`.
+	// `Connection`. Calling `shutdown()` triggers disconnected("shutdown")
+	// unless the session has already ended, in which case the original reason
+	// is reported and no further call is made.
 	Disconnected(reason *string) 
 	
 }
@@ -2422,7 +2423,8 @@ func Connect(socketAddr SocketAddr, protectCallback *ProtectCallback, authentica
 // Tears down library-global state. After this returns, all other
 // entry points fail with `NotInitialized` until `init()` is called
 // again. Any live `Connection` handles are shut down as part of
-// this call.
+// this call. Calling `init` or `connect` while `deinit` is running is an
+// error and can lead to incorrect behaviour.
 func Deinit() error {
 	_, _uniffiErr := rustCallWithError[EnsError](FfiConverterEnsError{},func(_uniffiStatus *C.RustCallStatus) bool {
 		C.uniffi_ens_fn_func_deinit(_uniffiStatus)
