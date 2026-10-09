@@ -490,9 +490,19 @@ void uniffi_ens_fn_method_config_set_backoff_initial(void* ptr, uint32_t seconds
 void uniffi_ens_fn_method_config_set_backoff_maximal(void* ptr, RustBuffer seconds, RustCallStatus *out_status
 );
 #endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_ENS_FN_METHOD_CONFIG_SET_BOOTSTRAP_ECH_TIMEOUT
+#define UNIFFI_FFIDEF_UNIFFI_ENS_FN_METHOD_CONFIG_SET_BOOTSTRAP_ECH_TIMEOUT
+void uniffi_ens_fn_method_config_set_bootstrap_ech_timeout(void* ptr, uint32_t seconds, RustCallStatus *out_status
+);
+#endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_ENS_FN_METHOD_CONFIG_SET_BUFFER_SIZE
 #define UNIFFI_FFIDEF_UNIFFI_ENS_FN_METHOD_CONFIG_SET_BUFFER_SIZE
 void uniffi_ens_fn_method_config_set_buffer_size(void* ptr, uint32_t size, RustCallStatus *out_status
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_ENS_FN_METHOD_CONFIG_SET_ENABLE_ECH_BOOTSTRAP
+#define UNIFFI_FFIDEF_UNIFFI_ENS_FN_METHOD_CONFIG_SET_ENABLE_ECH_BOOTSTRAP
+void uniffi_ens_fn_method_config_set_enable_ech_bootstrap(void* ptr, int8_t enable_ech, RustCallStatus *out_status
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_ENS_FN_METHOD_CONFIG_SET_KEEPALIVE_INTERVAL
@@ -508,6 +518,11 @@ void uniffi_ens_fn_method_config_set_keepalive_timeout(void* ptr, RustBuffer sec
 #ifndef UNIFFI_FFIDEF_UNIFFI_ENS_FN_METHOD_CONFIG_SET_ROOT_CERTIFICATE_OVERRIDE
 #define UNIFFI_FFIDEF_UNIFFI_ENS_FN_METHOD_CONFIG_SET_ROOT_CERTIFICATE_OVERRIDE
 void uniffi_ens_fn_method_config_set_root_certificate_override(void* ptr, RustBuffer override, RustCallStatus *out_status
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_ENS_FN_METHOD_CONFIG_SET_TLS_DOMAIN
+#define UNIFFI_FFIDEF_UNIFFI_ENS_FN_METHOD_CONFIG_SET_TLS_DOMAIN
+void uniffi_ens_fn_method_config_set_tls_domain(void* ptr, RustBuffer tls_domain, RustCallStatus *out_status
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_ENS_FN_CLONE_CONNECTION
@@ -907,9 +922,21 @@ uint16_t uniffi_ens_checksum_method_config_set_backoff_maximal(void
     
 );
 #endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_ENS_CHECKSUM_METHOD_CONFIG_SET_BOOTSTRAP_ECH_TIMEOUT
+#define UNIFFI_FFIDEF_UNIFFI_ENS_CHECKSUM_METHOD_CONFIG_SET_BOOTSTRAP_ECH_TIMEOUT
+uint16_t uniffi_ens_checksum_method_config_set_bootstrap_ech_timeout(void
+    
+);
+#endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_ENS_CHECKSUM_METHOD_CONFIG_SET_BUFFER_SIZE
 #define UNIFFI_FFIDEF_UNIFFI_ENS_CHECKSUM_METHOD_CONFIG_SET_BUFFER_SIZE
 uint16_t uniffi_ens_checksum_method_config_set_buffer_size(void
+    
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_ENS_CHECKSUM_METHOD_CONFIG_SET_ENABLE_ECH_BOOTSTRAP
+#define UNIFFI_FFIDEF_UNIFFI_ENS_CHECKSUM_METHOD_CONFIG_SET_ENABLE_ECH_BOOTSTRAP
+uint16_t uniffi_ens_checksum_method_config_set_enable_ech_bootstrap(void
     
 );
 #endif
@@ -928,6 +955,12 @@ uint16_t uniffi_ens_checksum_method_config_set_keepalive_timeout(void
 #ifndef UNIFFI_FFIDEF_UNIFFI_ENS_CHECKSUM_METHOD_CONFIG_SET_ROOT_CERTIFICATE_OVERRIDE
 #define UNIFFI_FFIDEF_UNIFFI_ENS_CHECKSUM_METHOD_CONFIG_SET_ROOT_CERTIFICATE_OVERRIDE
 uint16_t uniffi_ens_checksum_method_config_set_root_certificate_override(void
+    
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_ENS_CHECKSUM_METHOD_CONFIG_SET_TLS_DOMAIN
+#define UNIFFI_FFIDEF_UNIFFI_ENS_CHECKSUM_METHOD_CONFIG_SET_TLS_DOMAIN
+uint16_t uniffi_ens_checksum_method_config_set_tls_domain(void
     
 );
 #endif

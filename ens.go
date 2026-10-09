@@ -444,11 +444,29 @@ func uniffiCheckChecksums() {
 	}
 	{
 	checksum := rustCall(func(_uniffiStatus *C.RustCallStatus) C.uint16_t {
+		return C.uniffi_ens_checksum_method_config_set_bootstrap_ech_timeout()
+	})
+	if checksum != 52557 {
+		// If this happens try cleaning and rebuilding your project
+		panic("ens: uniffi_ens_checksum_method_config_set_bootstrap_ech_timeout: UniFFI API checksum mismatch")
+	}
+	}
+	{
+	checksum := rustCall(func(_uniffiStatus *C.RustCallStatus) C.uint16_t {
 		return C.uniffi_ens_checksum_method_config_set_buffer_size()
 	})
 	if checksum != 22653 {
 		// If this happens try cleaning and rebuilding your project
 		panic("ens: uniffi_ens_checksum_method_config_set_buffer_size: UniFFI API checksum mismatch")
+	}
+	}
+	{
+	checksum := rustCall(func(_uniffiStatus *C.RustCallStatus) C.uint16_t {
+		return C.uniffi_ens_checksum_method_config_set_enable_ech_bootstrap()
+	})
+	if checksum != 47231 {
+		// If this happens try cleaning and rebuilding your project
+		panic("ens: uniffi_ens_checksum_method_config_set_enable_ech_bootstrap: UniFFI API checksum mismatch")
 	}
 	}
 	{
@@ -476,6 +494,15 @@ func uniffiCheckChecksums() {
 	if checksum != 440 {
 		// If this happens try cleaning and rebuilding your project
 		panic("ens: uniffi_ens_checksum_method_config_set_root_certificate_override: UniFFI API checksum mismatch")
+	}
+	}
+	{
+	checksum := rustCall(func(_uniffiStatus *C.RustCallStatus) C.uint16_t {
+		return C.uniffi_ens_checksum_method_config_set_tls_domain()
+	})
+	if checksum != 52057 {
+		// If this happens try cleaning and rebuilding your project
+		panic("ens: uniffi_ens_checksum_method_config_set_tls_domain: UniFFI API checksum mismatch")
 	}
 	}
 	{
@@ -804,6 +831,8 @@ func (ffiObject *FfiObject)freeRustArcPtr() {
 		return 0
 	})
 }
+// Settings for `connect`. `connect` copies them, so changes apply only to
+// connections created afterwards.
 type ConfigInterface interface {
 	// When enabled, the TLS handshake with the ENS server offers only the
 	// post quantum X25519MLKEM768 key exchange.
@@ -818,10 +847,23 @@ type ConfigInterface interface {
 	// When set to null, the delay keeps growing without a limit.
 	// [default 120s]
 	SetBackoffMaximal(seconds *uint32) 
+	// Upper limit for the ECH bootstrap, in seconds. Setting it to 0 resets it
+	// back to the default.
+	// [default 30s]
+	SetBootstrapEchTimeout(seconds uint32) 
 	// Capacity of the internal queue holding error notifications before they
 	// are passed to the `ErrorNotificationCallback`. Must be non zero.
 	// [default 5]
 	SetBufferSize(size uint32) 
+	// Enables Encrypted Client Hello. Each connection first offers ECH with a
+	// throwaway key, the server rejects it and returns its ECH configuration,
+	// and the client reconnects with it (`tls_domain` becomes the inner
+	// SNI). If the server returns no usable ECH configuration, the session
+	// ends instead of falling back to plain TLS. Without `tls_domain` there
+	// is no hostname to hide, so ECH gives almost no privacy: the server is
+	// identified by its IP, which any observer sees.
+	// [default false]
+	SetEnableEchBootstrap(enableEch bool) 
 	// Interval between the keep alive messages sent over the ENS connection, in
 	// seconds. When the underlying tcp connection stops working, the dead
 	// connection will be detected after at most keepalive interval + keepalive
@@ -843,7 +885,14 @@ type ConfigInterface interface {
 	// When set to null, the built in certificate is used.
 	// [default null]
 	SetRootCertificateOverride(override *[]byte) 
+	// Server name sent as TLS SNI. The server certificate must be valid for
+	// it. When set to null, no SNI is sent and the certificate must be valid
+	// for the server IP.
+	// [default null]
+	SetTlsDomain(tlsDomain *string) 
 }
+// Settings for `connect`. `connect` copies them, so changes apply only to
+// connections created afterwards.
 type Config struct {
 	ffiObject FfiObject
 }
@@ -896,6 +945,19 @@ func (_self *Config) SetBackoffMaximal(seconds *uint32)  {
 	})
 }
 
+// Upper limit for the ECH bootstrap, in seconds. Setting it to 0 resets it
+// back to the default.
+// [default 30s]
+func (_self *Config) SetBootstrapEchTimeout(seconds uint32)  {
+	_pointer := _self.ffiObject.incrementPointer("*Config")
+	defer _self.ffiObject.decrementPointer()
+	rustCall(func(_uniffiStatus *C.RustCallStatus) bool {
+		C.uniffi_ens_fn_method_config_set_bootstrap_ech_timeout(
+		_pointer,FfiConverterUint32INSTANCE.Lower(seconds),_uniffiStatus)
+		return false
+	})
+}
+
 // Capacity of the internal queue holding error notifications before they
 // are passed to the `ErrorNotificationCallback`. Must be non zero.
 // [default 5]
@@ -905,6 +967,24 @@ func (_self *Config) SetBufferSize(size uint32)  {
 	rustCall(func(_uniffiStatus *C.RustCallStatus) bool {
 		C.uniffi_ens_fn_method_config_set_buffer_size(
 		_pointer,FfiConverterUint32INSTANCE.Lower(size),_uniffiStatus)
+		return false
+	})
+}
+
+// Enables Encrypted Client Hello. Each connection first offers ECH with a
+// throwaway key, the server rejects it and returns its ECH configuration,
+// and the client reconnects with it (`tls_domain` becomes the inner
+// SNI). If the server returns no usable ECH configuration, the session
+// ends instead of falling back to plain TLS. Without `tls_domain` there
+// is no hostname to hide, so ECH gives almost no privacy: the server is
+// identified by its IP, which any observer sees.
+// [default false]
+func (_self *Config) SetEnableEchBootstrap(enableEch bool)  {
+	_pointer := _self.ffiObject.incrementPointer("*Config")
+	defer _self.ffiObject.decrementPointer()
+	rustCall(func(_uniffiStatus *C.RustCallStatus) bool {
+		C.uniffi_ens_fn_method_config_set_enable_ech_bootstrap(
+		_pointer,FfiConverterBoolINSTANCE.Lower(enableEch),_uniffiStatus)
 		return false
 	})
 }
@@ -953,6 +1033,20 @@ func (_self *Config) SetRootCertificateOverride(override *[]byte)  {
 	rustCall(func(_uniffiStatus *C.RustCallStatus) bool {
 		C.uniffi_ens_fn_method_config_set_root_certificate_override(
 		_pointer,FfiConverterOptionalBytesINSTANCE.Lower(override),_uniffiStatus)
+		return false
+	})
+}
+
+// Server name sent as TLS SNI. The server certificate must be valid for
+// it. When set to null, no SNI is sent and the certificate must be valid
+// for the server IP.
+// [default null]
+func (_self *Config) SetTlsDomain(tlsDomain *string)  {
+	_pointer := _self.ffiObject.incrementPointer("*Config")
+	defer _self.ffiObject.decrementPointer()
+	rustCall(func(_uniffiStatus *C.RustCallStatus) bool {
+		C.uniffi_ens_fn_method_config_set_tls_domain(
+		_pointer,FfiConverterOptionalStringINSTANCE.Lower(tlsDomain),_uniffiStatus)
 		return false
 	})
 }
@@ -1387,6 +1481,12 @@ type ConnectionErrorNotificationKindSuperseded struct {
 
 func (e ConnectionErrorNotificationKindSuperseded) Destroy() {
 }
+// The server rejected the cipher used by the VPN connection.
+type ConnectionErrorNotificationKindUnsupportedCipher struct {
+}
+
+func (e ConnectionErrorNotificationKindUnsupportedCipher) Destroy() {
+}
 
 type FfiConverterConnectionErrorNotificationKind struct {}
 
@@ -1418,6 +1518,9 @@ func (FfiConverterConnectionErrorNotificationKind) Read(reader io.Reader) Connec
 		case 5:
 			return ConnectionErrorNotificationKindSuperseded{
 			};
+		case 6:
+			return ConnectionErrorNotificationKindUnsupportedCipher{
+			};
 		default:
 			panic(fmt.Sprintf("invalid enum value %v in FfiConverterConnectionErrorNotificationKind.Read()", id));
 	}
@@ -1436,6 +1539,8 @@ func (FfiConverterConnectionErrorNotificationKind) Write(writer io.Writer, value
 			writeInt32(writer, 4)
 		case ConnectionErrorNotificationKindSuperseded:
 			writeInt32(writer, 5)
+		case ConnectionErrorNotificationKindUnsupportedCipher:
+			writeInt32(writer, 6)
 		default:
 			_ = variant_value
 			panic(fmt.Sprintf("invalid enum value `%v` in FfiConverterConnectionErrorNotificationKind.Write", value))
@@ -1521,6 +1626,7 @@ var ErrEnsErrorInternalError = fmt.Errorf("EnsErrorInternalError")
 var ErrEnsErrorNotInitialized = fmt.Errorf("EnsErrorNotInitialized")
 var ErrEnsErrorAlreadyInitialized = fmt.Errorf("EnsErrorAlreadyInitialized")
 var ErrEnsErrorUnknownError = fmt.Errorf("EnsErrorUnknownError")
+var ErrEnsErrorInvalidInput = fmt.Errorf("EnsErrorInvalidInput")
 
 // Variant structs
 // Network or TLS failure while talking to the ENS server.
@@ -1692,6 +1798,35 @@ func (err EnsErrorUnknownError) Error() string {
 func (self EnsErrorUnknownError) Is(target error) bool {
 	return target == ErrEnsErrorUnknownError
 }
+// An argument passed to the library is invalid.
+type EnsErrorInvalidInput struct {
+	Reason string
+}
+// An argument passed to the library is invalid.
+func NewEnsErrorInvalidInput(
+	reason string,
+) *EnsError {
+	return &EnsError { err: &EnsErrorInvalidInput {
+			Reason: reason,} }
+}
+
+func (e EnsErrorInvalidInput) destroy() {
+		FfiDestroyerString{}.Destroy(e.Reason)
+}
+
+
+func (err EnsErrorInvalidInput) Error() string {
+	return fmt.Sprint("InvalidInput",
+		": ",
+		
+		"Reason=",
+		err.Reason,
+	)
+}
+
+func (self EnsErrorInvalidInput) Is(target error) bool {
+	return target == ErrEnsErrorInvalidInput
+}
 
 type FfiConverterEnsError struct{}
 
@@ -1732,6 +1867,10 @@ func (c FfiConverterEnsError) Read(reader io.Reader) *EnsError {
 		return &EnsError{ &EnsErrorUnknownError{
 			Reason: FfiConverterStringINSTANCE.Read(reader),
 		}}
+	case 7:
+		return &EnsError{ &EnsErrorInvalidInput{
+			Reason: FfiConverterStringINSTANCE.Read(reader),
+		}}
 	default:
 		panic(fmt.Sprintf("Unknown error code %d in FfiConverterEnsError.Read()", errorID))
 	}
@@ -1756,6 +1895,9 @@ func (c FfiConverterEnsError) Write(writer io.Writer, value *EnsError) {
 		case *EnsErrorUnknownError:
 			writeInt32(writer, 6)
 			FfiConverterStringINSTANCE.Write(writer, variantValue.Reason)
+		case *EnsErrorInvalidInput:
+			writeInt32(writer, 7)
+			FfiConverterStringINSTANCE.Write(writer, variantValue.Reason)
 		default:
 			_ = variantValue
 			panic(fmt.Sprintf("invalid error value `%v` in FfiConverterEnsError.Write", value))
@@ -1777,6 +1919,8 @@ func (_ FfiDestroyerEnsError) Destroy(value *EnsError) {
 		case EnsErrorAlreadyInitialized:
 			variantValue.destroy()
 		case EnsErrorUnknownError:
+			variantValue.destroy()
+		case EnsErrorInvalidInput:
 			variantValue.destroy()
 		default:
 			_ = variantValue
@@ -1871,6 +2015,8 @@ type ErrorNotificationCallback interface {
 	
 	// Delivers a connection-error notification received from the server.
 	// May be called zero or more times over the life of the connection.
+	// A panic or unhandled exception raised here ends the session, which is
+	// then reported through `disconnected`.
 	Notify(notification ConnectionErrorNotification) 
 	
 	// Signals that the ENS session has ended and no further `notify`
@@ -2408,6 +2554,10 @@ var FfiConverterTypeSocketAddrINSTANCE = FfiConverterString{}
 // The `authentication` variant must match the VPN protocol whose
 // tunnel ENS is meant to monitor: `Credentials` for OpenVPN and
 // NordWhisper, `Keys` for NordLynx.
+//
+// A server certificate that is not part of the trusted chain ends the
+// session without retrying. The `connect` returns no error, but the
+// connection emits disconnect event.
 func Connect(socketAddr SocketAddr, protectCallback *ProtectCallback, authentication Authentication, notificationCallback ErrorNotificationCallback, config *Config) (*Connection, error) {
 	_uniffiRV, _uniffiErr := rustCallWithError[EnsError](FfiConverterEnsError{},func(_uniffiStatus *C.RustCallStatus) unsafe.Pointer {
 		return C.uniffi_ens_fn_func_connect(FfiConverterTypeSocketAddrINSTANCE.Lower(socketAddr), FfiConverterOptionalCallbackInterfaceProtectCallbackINSTANCE.Lower(protectCallback), FfiConverterAuthenticationINSTANCE.Lower(authentication), FfiConverterCallbackInterfaceErrorNotificationCallbackINSTANCE.Lower(notificationCallback), FfiConverterConfigINSTANCE.Lower(config),_uniffiStatus)
@@ -2467,8 +2617,8 @@ func Init(appVersion string) error {
 // replaced with dots in release builds. Can be called before `init` to
 // enable logging output during initialisation.
 //
-// Replaces any previously registered log callback. Passing a new
-// callback drops the previous one.
+// Can be called once per process. A second call fails with
+// `InternalError` and keeps the first callback.
 func SetLogCallback(maxLevel LogLevel, callback LogCallback) error {
 	_, _uniffiErr := rustCallWithError[EnsError](FfiConverterEnsError{},func(_uniffiStatus *C.RustCallStatus) bool {
 		C.uniffi_ens_fn_func_set_log_callback(FfiConverterLogLevelINSTANCE.Lower(maxLevel), FfiConverterCallbackInterfaceLogCallbackINSTANCE.Lower(callback),_uniffiStatus)
